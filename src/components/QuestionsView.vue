@@ -6,12 +6,10 @@ import SurveyBuilder from './SurveyBuilder';
 export default {
   name: 'QuestionsView',
   props: ['questions', 'readOnly'],
-  data() {
-    return {
+  data: () => ({
       selectedQuestion: {id: null},
       questionList: JSON.parse(JSON.stringify(this.questions)),
-    };
-  },
+    }),
   components: {SurveyBuilder, vueSlider},
   methods: {
     editQuestion(question, index) {

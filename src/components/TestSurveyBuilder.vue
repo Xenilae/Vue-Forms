@@ -5,13 +5,11 @@ import {onMounted} from "vue";
 
 export default {
   name: 'TestSurveyBuilder',
-  data() {
-    return {
+  data: () => ({
       questionsList: [],
       addQuestion: false,
       sampleQuestion: null,
-    };
-  },
+  }),
   components: { SurveyBuilder, QuestionsView },
   setup() {
     onMounted(() => {
@@ -34,7 +32,6 @@ export default {
       } else {
         this.questionsList.push(JSON.parse(JSON.stringify(question)));
       }
-      this.addQuestion = false;
       this.$root.$emit('selected-question', null);
     },
 
