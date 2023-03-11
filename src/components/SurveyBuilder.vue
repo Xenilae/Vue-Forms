@@ -14,7 +14,7 @@ export default {
         { value: 'TEXT', label: 'Text' },
         { value: 'TIME', label: 'Time' },
       ],
-      question: { ...this.options, type: 'DEFAULT' },
+      question: { type: 'DEFAULT' },
       selectedType: null,
   }),
   props: ['options'],
@@ -75,7 +75,7 @@ export default {
       question.id = question.id ? question.id : this.getGUID(); // eslint-disable-line
       const operation = 'save'
       this.$root.$emit('add-update-question', { question, operation })
-      this.question = { type: 'DEFAULT' }
+      this.question = { ...this.options, type: 'DEFAULT' }
 
       console.log(question.text, question)
     },
@@ -132,7 +132,7 @@ export default {
           </div>
         </div>
         <div class="display-block">
-          <button class="vsb-btn-link color-blue" v-on:click="addAnotherAnswer()">Add another answer</button>
+          <button class="vsb-btn-link color-blue" @:click="addAnotherAnswer()">Add another answer</button>
         </div>
       </div>
 
