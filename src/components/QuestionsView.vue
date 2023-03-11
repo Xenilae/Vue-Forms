@@ -77,30 +77,33 @@
 // import _ from 'lodash';
 import vueSlider from 'vue-slider-component';
 import SurveyBuilder from './SurveyBuilder';
+import EventEmitter from "events";
+import {reactive} from "vue";
 
 export default {
   name: 'QuestionsView',
-  data() {
-    return {
-      selectedQuestion: { id: null },
-    };
-  },
   props: ['questions', 'readOnly'],
   components: { SurveyBuilder, vueSlider },
-  mounted() {
-    this.$root.$on('selected-question', obj => {
-      window.console.log(obj);
-      this.selectedQuestion = { id: null };
-    });
+  setup() {
+    const eventEmitter = new EventEmitter()
+    const selectedQuestion = reactive({id: null})
+
+    const emitSelectedQuestion = () => {
+      eventEmitter.emit('selected-question', { id: 123 })
+    }
+
+    return {
+      emitSelectedQuestion,
+      selectedQuestion
+    }
   },
-  computed: {},
-  watch: {},
   methods: {
     editQuestion(question, index) {
       this.selectedQuestion = JSON.parse(JSON.stringify(question));
       this.selectedQuestion.questionNumber = index + 1;
     },
     deleteQuestion(question, index) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.questions.splice(index, 1);
     },
   },
