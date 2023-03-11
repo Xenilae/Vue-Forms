@@ -1,36 +1,6 @@
-<script>
-// import _ from 'lodash';
-import vueSlider from 'vue-slider-component';
-import SurveyBuilder from './SurveyBuilder';
-
-export default {
-  name: 'QuestionsView',
-  props: ['questions', 'readOnly'],
-  data: () => ({
-      selectedQuestion: {id: null},
-      questionList: JSON.parse(JSON.stringify(this.questions)),
-    }),
-  components: {SurveyBuilder, vueSlider},
-  methods: {
-    editQuestion(question, index) {
-      this.selectedQuestion = JSON.parse(JSON.stringify(question));
-      this.selectedQuestion.questionNumber = index + 1;
-    },
-    deleteQuestion(index) {
-      this.questionList.splice(index, 1);
-    },
-    watch: {
-      questions(newVal) {
-        this.questionList = JSON.parse(JSON.stringify(newVal));
-      },
-    },
-  },
-};
-</script>
-
 <template>
   <div class="row">
-    <div v-for="(question, index) in questions" :key="question.id">
+    <div v-for="(question, index) in questions" :key="index">
       <div v-if="selectedQuestion.id === question.id">
         <SurveyBuilder :options="selectedQuestion"></SurveyBuilder>
       </div>
@@ -102,6 +72,40 @@ export default {
     </div>
   </div>
 </template>
+
+<script>
+// import _ from 'lodash';
+import vueSlider from 'vue-slider-component';
+import SurveyBuilder from './SurveyBuilder';
+
+export default {
+  name: 'QuestionsView',
+  data() {
+    return {
+      selectedQuestion: { id: null },
+    };
+  },
+  props: ['questions', 'readOnly'],
+  components: { SurveyBuilder, vueSlider },
+  mounted() {
+    this.$root.$on('selected-question', obj => {
+      window.console.log(obj);
+      this.selectedQuestion = { id: null };
+    });
+  },
+  computed: {},
+  watch: {},
+  methods: {
+    editQuestion(question, index) {
+      this.selectedQuestion = JSON.parse(JSON.stringify(question));
+      this.selectedQuestion.questionNumber = index + 1;
+    },
+    deleteQuestion(question, index) {
+      this.questions.splice(index, 1);
+    },
+  },
+};
+</script>
 
 <style scoped lang="scss">
 $color-primary: #f8f8f8;

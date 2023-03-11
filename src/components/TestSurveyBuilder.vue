@@ -1,29 +1,36 @@
+<template>
+  <div class="test-survey-builder">
+    <h2 class="text-center">Vue Survey Builder Demo</h2>
+    <hr/>
+    <QuestionsView :questions="questionsList" :readOnly="true" />
+    <div v-if="addQuestion">
+      <SurveyBuilder :options="sampleQuestion" />
+    </div>
+    <div class="pt-10">
+      <button type="button" class="add_another_btn br-25" v-on:click="addNewQuestion()">Add question</button>
+    </div>
+  </div>
+</template>
+
 <script>
-import SurveyBuilder from "@/components/SurveyBuilder.vue";
+import SurveyBuilder from 'vue-survey-builder';
 import QuestionsView from './QuestionsView';
-import {onMounted} from "vue";
+import sampleQuestionObj from './survey-builder.json';
 
 export default {
   name: 'TestSurveyBuilder',
-  data: () => ({
+  data() {
+    return {
       questionsList: [],
       addQuestion: false,
-      sampleQuestion: null,
-  }),
-  components: { SurveyBuilder, QuestionsView },
-  setup() {
-    onMounted(() => {
-      window.addEventListener("add-update-question", (event) => {
-        const { question, operation } = event.detail;
-        if (operation === 'save') {
-          this.updateQuestionsList(question);
-        } else if (operation === 'delete') {
-          this.deleteQuestion(question);
-        }
-      });
+    };
+  },
+  mounted() {
+    this.$root.$on('add-update-question', q => {
+      this.updateQuestionsList(q);
     });
   },
-
+  components: { SurveyBuilder, QuestionsView },
   methods: {
     updateQuestionsList(question) {
       const questionIndex = this.questionsList.findIndex(x => x.id === question.id);
@@ -32,61 +39,19 @@ export default {
       } else {
         this.questionsList.push(JSON.parse(JSON.stringify(question)));
       }
+      this.addQuestion = false;
       this.$root.$emit('selected-question', null);
+      window.console.log(question, this.addQuestion, this.questionsList);
     },
-
     addNewQuestion() {
-      this.sampleQuestion = {
-        type: 'DEFAULT',
-        text: '',
-        required: false,
-        options: [],
-        labels: [],
-        id: this.getGUID(),
-      };
+      this.sampleQuestion = JSON.parse(JSON.stringify(sampleQuestionObj));
       this.addQuestion = true;
-    },
-
-    deleteQuestion(question) {
-      const questionIndex = this.questionsList.findIndex(x => x.id === question.id);
-      if (questionIndex >= 0) {
-        this.questionsList.splice(questionIndex, 1);
-      }
-    },
-
-    getGUID() {
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-      }
-      return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
     },
   },
 };
 </script>
 
-<template>
-  <div class="test-survey-builder">
-    <h2 class="text-center">Vue Survey Builder Demo</h2>
-    <hr/>
-    <QuestionsView
-        :questions="questionsList"
-        :read-only="true"
-        @delete-question="deleteQuestion"
-    ></QuestionsView>
-    <div v-if="addQuestion">
-      <SurveyBuilder :options="sampleQuestion" />
-    </div>
-    <div class="pt-10">
-      <button type="button" class="add_another_btn br-25" v-on:click="addNewQuestion()">Add question</button>
-    </div>
-    <div class="pt-10">
-      <button type="button" class="add_another_btn br-25" v-on:click="updateQuestionsList()">Update question</button>
-    </div>
-  </div>
-</template>
-
+<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .add_another_btn {
   font-size: 14px;

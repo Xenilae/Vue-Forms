@@ -1,101 +1,3 @@
-<script>
-export default {
-  name: 'SurveyBuilder',
-  data: () => ({
-      questionsList: [],
-      questionTypes: [
-        { value: 'DEFAULT', label: '- Select a question type -' },
-        { value: 'BOOLEAN', label: 'Yes or No' },
-        { value: 'DATE', label: 'Date' },
-        { value: 'MULTI_CHOICE', label: 'Multiple Choice' },
-        { value: 'NUMBER', label: 'Number' },
-        { value: 'SCALE', label: 'Scale' },
-        { value: 'SINGLE_CHOICE', label: 'Single Choice' },
-        { value: 'TEXT', label: 'Text' },
-        { value: 'TIME', label: 'Time' },
-      ],
-      question: { ...this.options, type: 'DEFAULT' },
-      selectedType: null,
-  }),
-  props: ['options'],
-  mounted() {
-    this.selectedType = this.question.type;
-  },
-  methods: {
-    questionTypeChanged(type) {
-      this.question.type = this.selectedType;
-      switch (type) {
-        case 'BOOLEAN':
-          this.question.options = [{body: 'Yes', sequence: 1}, {body: 'No', sequence: 2}];
-          break;
-        case 'SCALE':
-          this.question.labels.length = 2;
-          break;
-        default:
-          window.console.log('Question type not matched');
-      }
-    },
-
-    timeFormatModified(format) {
-      window.console.log(format);
-    },
-
-    addAnotherAnswer() {
-      if (!this.question.options) {
-        this.question.options = [];
-      }
-      let maxSequence = Number(Math.max(...this.question.options.map(x => x.sequence)));
-      if (!maxSequence) {
-        maxSequence = this.question.options.length;
-      }
-      this.question.options.push({body: null, sequence: maxSequence + 1, nextQuestion: null, imageUrl: null}); // eslint-disable-line
-      this.$forceUpdate();
-    },
-
-    deleteQuestionOptionItem(options, index) {
-      this.question.options.splice(index, 1);
-    },
-
-    getGUID() {
-      const s4 = () => {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-      }
-
-      return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4() + s4() + s4()}`;
-    },
-
-    saveQuestion(question) {
-      if(question.type === 'MULTI_CHOICE' || question.type === 'SINGLE_CHOICE' || question.type === 'BOOLEAN') {
-        question.options.forEach((option) => {
-          option.text = option.body;
-        });
-      }
-      question.id = question.id ? question.id : this.getGUID(); // eslint-disable-line
-      const operation = 'save'
-      this.$root.$emit('add-update-question', { question, operation })
-      this.question = { type: 'DEFAULT' }
-
-      console.log(question.text, question)
-    },
-
-    cancelQuestion(question) {
-      window.console.log(question);
-      this.question = { type: 'DEFAULT' };
-    },
-
-    deleteQuestion(question) {
-      window.console.log(question);
-    },
-
-    changeLabelsLength(intervals) {
-      this.question.labels.length = intervals;
-    },
-  },
-};
-</script>
-
 <template>
   <div class="vue-survey-builder-content vsb-content">
     <select class="vsb-select" v-model="selectedType" v-on:change="questionTypeChanged(selectedType)">
@@ -218,6 +120,145 @@ export default {
   </div>
 </template>
 
+<script>
+export default {
+  name: 'SurveyBuilder',
+  data() {
+    return {
+      questionTypes: [
+        { value: 'DEFAULT', label: '- Select a question type -' },
+        { value: 'BOOLEAN', label: 'Yes or No' },
+        { value: 'DATE', label: 'Date' },
+        { value: 'MULTI_CHOICE', label: 'Multiple Choice' },
+        { value: 'NUMBER', label: 'Number' },
+        { value: 'SCALE', label: 'Scale' },
+        { value: 'SINGLE_CHOICE', label: 'Single Choice' },
+        { value: 'TEXT', label: 'Text' },
+        { value: 'TIME', label: 'Time' },
+      ],
+      question: this.options,
+      selectedType: null,
+    };
+  },
+  props: ['options'],
+  computed: {},
+  watch: {},
+  beforeCreate() {},
+  created() {},
+  beforeMount() {},
+  mounted() {
+    this.question.type = this.question.type ? this.question.type : 'DEFAULT';
+    this.selectedType = this.question.type;
+
+    window.console.log(this.question, this.selectedType);
+  },
+  beforeUpdate() {},
+  updated() {},
+  beforeDestroy() {},
+  destroyed() {},
+  methods: {
+    /**
+     * @desc {String} type
+     * @param {String} type
+     * @return {null}
+     */
+    questionTypeChanged(type) {
+      this.question.type = this.selectedType;
+      switch (type) {
+        case 'BOOLEAN':
+          this.question.options = [{ body: 'Yes', sequence: 1 }, { body: 'No', sequence: 2 }];
+          break;
+        case 'SCALE':
+          this.question.labels.length = 2;
+          break;
+        default:
+          window.console.log('Question type not matched');
+      }
+    },
+
+    /**
+     * @param {String} format
+     * @return {null}
+     */
+    timeFormatModified(format) {
+      window.console.log(format);
+    },
+
+    /**
+     * @param {null}
+     * @return {null}
+     */
+    addAnotherAnswer() {
+      if (!this.question.options) {
+        this.question.options = [];
+      }
+      let maxSequence = Number(Math.max(...this.question.options.map(x => x.sequence)));
+      if (!maxSequence) {
+        maxSequence = this.question.options.length;
+      }
+      this.question.options.push({ body: null, sequence: maxSequence + 1, nextQuestion: null, imageUrl: null }); // eslint-disable-line
+      this.$forceUpdate();
+    },
+
+    /**
+     * @param {Object, Number}  options, index
+     * @return {null}
+     */
+    deleteQuestionOptionItem(options, index) {
+      this.question.options.splice(index, 1);
+    },
+
+    /**
+     * @param {null}
+     * @return {String} guid
+     */
+    getGUID() {
+      function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
+      }
+      return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4() + s4() + s4()}`;
+    },
+
+    /**
+     * @param {Object} question
+     * @return {null}
+     */
+    saveQuestion(question) {
+      question.id = question.id ? question.id : this.getGUID(); // eslint-disable-line
+      this.$root.$emit('add-update-question', { question, operation: 'save' });
+      this.question = { type: 'DEFAULT' };
+    },
+
+    /**
+     * @param {Object} question
+     * @return {null}
+     */
+    cancelQuestion(question) {
+      window.console.log(question);
+      this.question = { type: 'DEFAULT' };
+    },
+
+    /**
+     * @param {Object} question
+     * @return {null}
+     */
+    deleteQuestion(question) {
+      window.console.log(question);
+    },
+
+    /**
+     * @param {Number} intervals
+     * @return {null}
+     */
+    changeLabelsLength(intervals) {
+      this.question.labels.length = intervals;
+    },
+  },
+};
+</script>
+
 <style scoped lang="scss">
 $color-primary: #f8f8f8;
 $color-secondary: #eaf0f4;
@@ -304,6 +345,7 @@ $color-green: #48bf7a;
     -moz-appearance: none;
     background-position: right 50%;
     background-repeat: no-repeat;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAMCAYAAABSgIzaAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NDZFNDEwNjlGNzFEMTFFMkJEQ0VDRTM1N0RCMzMyMkIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NDZFNDEwNkFGNzFEMTFFMkJEQ0VDRTM1N0RCMzMyMkIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo0NkU0MTA2N0Y3MUQxMUUyQkRDRUNFMzU3REIzMzIyQiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo0NkU0MTA2OEY3MUQxMUUyQkRDRUNFMzU3REIzMzIyQiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PuGsgwQAAAA5SURBVHjaYvz//z8DOYCJgUxAf42MQIzTk0D/M+KzkRGPoQSdykiKJrBGpOhgJFYTWNEIiEeAAAMAzNENEOH+do8AAAAASUVORK5CYII=);
   }
 
   button {
